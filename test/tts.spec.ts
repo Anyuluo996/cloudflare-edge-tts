@@ -104,7 +104,7 @@ describe("getVoices", () => {
   });
 
   it("returns the vendor voice list", async () => {
-    listVoicesMock.mockResolvedValueOnce([
+    const vendorVoices = [
       {
         Name: "Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoxiaoNeural)",
         ShortName: "zh-CN-XiaoxiaoNeural",
@@ -118,11 +118,12 @@ describe("getVoices", () => {
           VoicePersonalities: ["Friendly"],
         },
       },
-    ]);
+    ];
+    listVoicesMock.mockResolvedValueOnce(vendorVoices);
 
     const voices = await getVoices();
 
-    expect(voices).toHaveLength(1);
-    expect(voices[0]?.ShortName).toBe("zh-CN-XiaoxiaoNeural");
+    expect(listVoicesMock).toHaveBeenCalledTimes(1);
+    expect(voices).toBe(vendorVoices);
   });
 });
