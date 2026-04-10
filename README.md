@@ -48,7 +48,7 @@ Validation and error behavior:
 
 - Requires `Content-Type: application/json`
 - Requires a non-empty string `text`
-- Returns `502` when the upstream TTS request fails
+- Returns `502` when the upstream TTS request fails before the audio response starts, for example before or while priming the first chunk
 
 ## Setup
 
@@ -111,9 +111,9 @@ npm run dev
 In another terminal, run the smoke test against `localhost:8787`:
 
 ```bash
-curl -i http://127.0.0.1:8787/health
-curl -s http://127.0.0.1:8787/voices --output /tmp/cloudflare-edge-tts-voices.json
-curl -X POST http://127.0.0.1:8787/tts \
+curl -i --max-time 10 http://127.0.0.1:8787/health
+curl -sS --max-time 10 http://127.0.0.1:8787/voices --output /tmp/cloudflare-edge-tts-voices.json
+curl -sS --max-time 10 -X POST http://127.0.0.1:8787/tts \
   -H 'Content-Type: application/json' \
   --data '{"text":"你好，世界"}' \
   --output /tmp/cloudflare-edge-tts.mp3
@@ -142,8 +142,9 @@ This project depends on `edge-tts-universal@1.4.0`, which is licensed under the 
 
 Observed remote validation result on 2026-04-10 with `wrangler 4.81.1`:
 
-- `npx wrangler whoami` succeeded and the remote preview uploaded under account `1f1d1678a2413a54c944b3081bab5c84`
-- `npm run dev` started `wrangler dev --remote` and reported `Ready on http://localhost:8787`
+- `npx wrangler whoami` succeeded
+- The authenticated Cloudflare account context used for the run was `1f1d1678a2413a54c944b3081bab5c84`
+- `npm run dev` started `wrangler dev --remote`, uploaded a remote preview, and reported `Ready on http://localhost:8787`
 - `curl -i --max-time 10 http://127.0.0.1:8787/health` failed with `curl: (28) Operation timed out after 10005 milliseconds with 0 bytes received`
 - `curl -sS --max-time 10 http://127.0.0.1:8787/voices --output /tmp/cloudflare-edge-tts-voices.json` failed with `curl: (28) Operation timed out after 10004 milliseconds with 0 bytes received`, so no `ShortName` entries could be confirmed from the remote run
 - `curl -sS --max-time 10 -X POST http://127.0.0.1:8787/tts -H 'Content-Type: application/json' --data '{"text":"你好，世界"}' --output /tmp/cloudflare-edge-tts.mp3` failed with `curl: (28) Operation timed out after 10004 milliseconds with 0 bytes received`, and no non-zero MP3 was produced
