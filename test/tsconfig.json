@@ -4,5 +4,9 @@
     "moduleResolution": "Bundler",
     "types": ["@cloudflare/vitest-pool-workers"]
   },
-  "include": ["./**/*.ts", "../worker-configuration.d.ts"]
+  "include": [
+    "./**/*.ts",
+    "../src/edge-tts-universal-isomorphic.d.ts",
+    "../worker-configuration.d.ts"
+  ]
 }
