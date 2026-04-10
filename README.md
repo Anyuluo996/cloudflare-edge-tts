@@ -159,7 +159,7 @@ Observed remote validation result on 2026-04-10 with `wrangler 4.81.1`:
 - The authenticated Cloudflare account context used for the run was `1f1d1678a2413a54c944b3081bab5c84`
 - `npm run dev` started `wrangler dev --remote`, uploaded a remote preview, and reported `Ready on http://localhost:8787`
 - `curl -i --max-time 10 http://127.0.0.1:8787/health` failed with `curl: (28) Operation timed out after 10005 milliseconds with 0 bytes received`
-- `curl -sS --max-time 10 http://127.0.0.1:8787/voices --output /tmp/cloudflare-edge-tts-voices.json` failed with `curl: (28) Operation timed out after 10004 milliseconds with 0 bytes received`, so no `ShortName` entries could be confirmed from the remote run
-- `curl -sS --max-time 10 -X POST http://127.0.0.1:8787/tts -H 'Content-Type: application/json' --data '{"text":"你好，世界"}' --output /tmp/cloudflare-edge-tts.mp3` failed with `curl: (28) Operation timed out after 10004 milliseconds with 0 bytes received`, and no non-zero MP3 was produced
+- The `/voices` smoke test timed out with `curl: (28) Operation timed out after 10004 milliseconds with 0 bytes received`, so no HTTP status was printed and no usable `/tmp/cloudflare-edge-tts-voices.headers` or `/tmp/cloudflare-edge-tts-voices.json` artifact was produced for confirming `ShortName` entries
+- The `/tts` smoke test timed out with `curl: (28) Operation timed out after 10004 milliseconds with 0 bytes received`, so no HTTP status was printed and no usable `/tmp/cloudflare-edge-tts-tts.headers` or `/tmp/cloudflare-edge-tts-tts.body` artifact was produced to distinguish `200 audio/mpeg` success from a JSON/HTTP failure
 
 This means the real validation via `wrangler dev --remote` did not succeed in this environment. The localhost remote-preview proxy accepted TCP connections but did not return any HTTP response bytes for `/health`, `/voices`, or `/tts`, so the Worker could not be verified successfully against the real Cloudflare runtime from this run.
