@@ -1,4 +1,5 @@
 import { handleHealth } from "./handlers/health";
+import { handleTts } from "./handlers/tts";
 import { handleVoices } from "./handlers/voices";
 import { errorResponse, noContent, withCors } from "./lib/http";
 
@@ -23,6 +24,14 @@ async function routeRequest(request: Request) {
     }
 
     return handleVoices();
+  }
+
+  if (pathname === "/tts") {
+    if (request.method !== "POST") {
+      return errorResponse(405, "METHOD_NOT_ALLOWED", "method not allowed");
+    }
+
+    return handleTts(request);
   }
 
   return errorResponse(404, "NOT_FOUND", "route not found");

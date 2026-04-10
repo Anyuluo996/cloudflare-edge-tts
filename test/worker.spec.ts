@@ -48,6 +48,14 @@ describe("worker routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getVoicesMock.mockResolvedValue(sampleVoices);
+    createAudioStreamMock.mockResolvedValue(
+      new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new Uint8Array([1, 2, 3]));
+          controller.close();
+        },
+      })
+    );
   });
 
   it("returns health status", async () => {
@@ -81,6 +89,115 @@ describe("worker routes", () => {
       error: {
         code: "TTS_UPSTREAM_ERROR",
         message: "failed to fetch voices",
+      },
+    });
+  });
+
+  it("returns audio stream for valid tts requests", async () => {
+    const response = await dispatch(
+      new IncomingRequest("https://example.com/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: " hello world ",
+        }),
+      })
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("audio/mpeg");
+    expect(createAudioStreamMock).toHaveBeenCalledWith({
+      text: "hello world",
+      voice: undefined,
+    });
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(
+      new Uint8Array([1, 2, 3])
+    );
+  });
+
+  it("forwards explicit voice for tts requests", async () => {
+    const response = await dispatch(
+      new IncomingRequest("https://example.com/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: "hello world",
+          voice: "en-US-JennyNeural",
+        }),
+      })
+    );
+
+    expect(response.status).toBe(200);
+    expect(createAudioStreamMock).toHaveBeenCalledWith({
+      text: "hello world",
+      voice: "en-US-JennyNeural",
+    });
+  });
+
+  it("rejects non-json tts requests", async () => {
+    const response = await dispatch(
+      new IncomingRequest("https://example.com/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain",
+        },
+        body: "hello world",
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "INVALID_CONTENT_TYPE",
+        message: "content-type must be application/json",
+      },
+    });
+  });
+
+  it("rejects tts requests with missing text", async () => {
+    const response = await dispatch(
+      new IncomingRequest("https://example.com/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "INVALID_REQUEST",
+        message: "text is required",
+      },
+    });
+  });
+
+  it("returns upstream error when tts synthesis fails before streaming starts", async () => {
+    createAudioStreamMock.mockRejectedValueOnce(new Error("upstream failed"));
+
+    const response = await dispatch(
+      new IncomingRequest("https://example.com/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: "hello world",
+        }),
+      })
+    );
+
+    expect(response.status).toBe(502);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "TTS_UPSTREAM_ERROR",
+        message: "failed to synthesize audio",
       },
     });
   });
