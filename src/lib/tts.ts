@@ -1,4 +1,4 @@
-export const DEFAULT_VOICE = "zh-CN-Xiaoxiao:DragonHDFlashLatestNeural";
+export const DEFAULT_VOICE = "en-US-AvaMultilingualNeural";
 
 const READALOUD_BASE =
   "speech.platform.bing.com/consumer/speech/synthesize/readaloud";

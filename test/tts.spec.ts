@@ -156,7 +156,7 @@ describe("createAudioStream", () => {
     expect(String(socket.sent[0])).toContain("Path:speech.config");
     expect(String(socket.sent[1])).toContain("Path:ssml");
     expect(String(socket.sent[1])).toContain(
-      "Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoxiaoNeural)"
+      "Microsoft Server Speech Text to Speech Voice (en-US, AvaMultilingualNeural)"
     );
     expect(String(socket.sent[1])).toContain("hello world");
 

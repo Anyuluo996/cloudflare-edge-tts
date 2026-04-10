@@ -12,7 +12,7 @@ const { getVoicesMock, createAudioStreamMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("../src/lib/tts", () => ({
-  DEFAULT_VOICE: "zh-CN-Xiaoxiao:DragonHDFlashLatestNeural",
+  DEFAULT_VOICE: "en-US-AvaMultilingualNeural",
   getVoices: getVoicesMock,
   createAudioStream: createAudioStreamMock,
 }));

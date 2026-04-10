@@ -22,14 +22,14 @@ Returns the available Edge TTS voices:
 {
   "voices": [
     {
-      "Name": "Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoxiaoNeural)",
-      "ShortName": "zh-CN-XiaoxiaoNeural"
+      "Name": "Microsoft Server Speech Text to Speech Voice (en-US, AvaMultilingualNeural)",
+      "ShortName": "en-US-AvaMultilingualNeural"
     }
   ]
 }
 ```
 
-The `voices` payload includes `ShortName` values. This Worker's default voice remains `zh-CN-Xiaoxiao:DragonHDFlashLatestNeural`, but the Worker resolves that provider-specific alias to a compatible Xiaoxiao Edge TTS voice before synthesis. Callers may pass either a discovered `ShortName` or the default provider voice alias.
+The `voices` payload includes `ShortName` values. This Worker's default voice is `en-US-AvaMultilingualNeural`. Callers may pass any discovered `ShortName`, and the Worker also accepts certain provider-style aliases when they can be mapped to a compatible Edge TTS voice.
 
 ### `POST /tts`
 
@@ -40,11 +40,11 @@ Request body:
 ```json
 {
   "text": "你好，世界",
-  "voice": "zh-CN-XiaoxiaoNeural"
+  "voice": "en-US-AvaMultilingualNeural"
 }
 ```
 
-`voice` is optional. When omitted, the Worker uses `zh-CN-Xiaoxiao:DragonHDFlashLatestNeural`.
+`voice` is optional. When omitted, the Worker uses `en-US-AvaMultilingualNeural`.
 
 Validation and error behavior:
 
